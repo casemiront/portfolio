@@ -8,7 +8,7 @@ const contatoForm = document.getElementById('contato-form');
 const themeToggle = document.getElementById('theme-toggle');
 const loader = document.getElementById('loader');
 
-// Loading screen
+
 window.addEventListener('load', () => {
     setTimeout(() => {
         loader.style.opacity = '0';
@@ -21,10 +21,10 @@ window.addEventListener('load', () => {
 
 
 
-// Partículas de fundo
+
 class ParticlesAnimation {
     constructor() {
-        this.canvas = document.getElementById('particles-canvas');
+        this.   canvas = document.getElementById('particles-canvas');
         if (!this.canvas) return;
         
         this.ctx = this.canvas.getContext('2d');
@@ -78,7 +78,7 @@ class ParticlesAnimation {
 
 new ParticlesAnimation();
 
-// Toggle tema
+
 themeToggle.addEventListener('click', () => {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -290,45 +290,56 @@ filterBtns.forEach(btn => {
 
 // Formulário de contato com validação
 contatoForm.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const submitBtn = this.querySelector('button[type="submit"]');
-    const nome = document.getElementById('nome').value;
-    const email = document.getElementById('email').value;
-    const assunto = document.getElementById('assunto').value;
-    const mensagem = document.getElementById('mensagem').value;
-    
-    // Validação simples
-    if (!nome || !email || !assunto || !mensagem) {
-        showNotification('Por favor, preencha todos os campos.', 'error');
-        return;
+  e.preventDefault();
+
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const nome = document.getElementById('nome').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const assunto = document.getElementById('assunto').value.trim();
+  const mensagem = document.getElementById('mensagem').value.trim();
+
+  // Validação simples
+  if (!nome || !email || !assunto || !mensagem) {
+    showNotification('Por favor, preencha todos os campos.', 'error');
+    return;
+  }
+  if (!isValidEmail(email)) {
+    showNotification('Por favor, insira um email válido.', 'error');
+    return;
+  }
+
+  submitBtn.classList.add('loading');
+
+  try {
+    // Enviar para o Formspree
+    const formData = new FormData(contatoForm);
+
+    // (opcional) garantir assunto também pelo JS:
+    if (!formData.has('_subject')) {
+      formData.append('_subject', 'Nova mensagem do Portfólio');
     }
-    
-    if (!isValidEmail(email)) {
-        showNotification('Por favor, insira um email válido.', 'error');
-        return;
+
+    const resp = await fetch(contatoForm.action || 'https://formspree.io/f/manbzlze', {
+      method: 'POST',
+      body: formData,
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (resp.ok) {
+      showNotification(`Obrigado pela mensagem, ${nome}! Vou responder em breve.`, 'success');
+      contatoForm.reset();
+
+      // Animação de sucesso
+      contatoForm.style.transform = 'scale(0.95)';
+      setTimeout(() => { contatoForm.style.transform = 'scale(1)'; }, 200);
+    } else {
+      showNotification('Erro ao enviar mensagem. Tente novamente.', 'error');
     }
-    
-    submitBtn.classList.add('loading');
-    
-    // Simular envio
-    try {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        showNotification(`Obrigado pela mensagem, ${nome}! Vou responder em breve.`, 'success');
-        contatoForm.reset();
-        
-        // Animação de sucesso
-        contatoForm.style.transform = 'scale(0.95)';
-        setTimeout(() => {
-            contatoForm.style.transform = 'scale(1)';
-        }, 200);
-        
-    } catch (error) {
-        showNotification('Erro ao enviar mensagem. Tente novamente.', 'error');
-    } finally {
-        submitBtn.classList.remove('loading');
-    }
+  } catch (error) {
+    showNotification('Erro de conexão. Tente novamente.', 'error');
+  } finally {
+    submitBtn.classList.remove('loading');
+  }
 });
 
 // Função para validar email
@@ -418,6 +429,11 @@ function animateOnScroll() {
         }
     });
 }
+    //remover o 
+    document.addEventListener('DOMContentLoaded', () => {
+    const si = document.querySelector('.scroll-indicator');
+    if (si) si.remove();
+    });
 
 // Adicionar classes de animação
 document.addEventListener('DOMContentLoaded', () => {
@@ -443,17 +459,10 @@ window.addEventListener('scroll', animateOnScroll);
 
 // Header transparente/sólida no scroll
 window.addEventListener('scroll', () => {
-    const header = document.querySelector('.header');
-    const scrolled = window.scrollY > 100;
-    
-    if (scrolled) {
-        header.style.background = 'rgba(255, 255, 255, 0.98)';
-        header.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
-    } else {
-        header.style.background = 'rgba(255, 255, 255, 0.95)';
-        header.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
-    }
+  const header = document.querySelector('.header');
+  header.classList.toggle('scrolled', window.scrollY > 100);
 });
+
 
 // Fechar menu mobile ao redimensionar tela
 window.addEventListener('resize', () => {
@@ -489,7 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Delay nas animações dos cards
     const projetoCards = document.querySelectorAll('.projeto-card');
     projetoCards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.1}s`;
+        card.style.animationDelay = `${index * 0.5}s`;
     });
     
     // Feedback visual dos botões
@@ -516,15 +525,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Parallax simples
-window.addEventListener('scroll', () => {
-    const scrolled = window.pageYOffset;
-    const parallaxElements = document.querySelectorAll('.hero-image img');
+//window.addEventListener('scroll', () => {
+    //const scrolled = window.pageYOffset;
+    //const parallaxElements = document.querySelectorAll('.hero-image img');
     
-    parallaxElements.forEach(element => {
-        const speed = 0.5;
-        element.style.transform = `translateY(${scrolled * speed}px)`;
-    });
-});
+    //parallaxElements.forEach(element => {
+        //const speed = 0.5;
+        //element.style.transform = `translateY(${scrolled * speed}px)`;
+    //});
+//})
 
 // Easter egg no console
 console.log(`
