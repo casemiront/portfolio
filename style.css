@@ -9,7 +9,7 @@
 :root {
     --cor-primaria: #2563eb;
     --cor-secundaria: #64748b;
-    --cor-texto: #1e293b;
+    --cor-texto: #2a4466;
     --cor-texto-claro: #64748b;
     --cor-fundo: #ffffff;
     --cor-fundo-alt: #f8fafc;
@@ -21,6 +21,8 @@
     --espacamento: 1rem;
     --gradiente-primario: linear-gradient(135deg, #2563eb, #3b82f6);
     --gradiente-secundario: linear-gradient(135deg, #64748b, #94a3b8);
+    --cor-button-filter: #006aff;
+    --cor-button-filter2: #ffffff;
 }
 
 /* Tema escuro */
@@ -715,6 +717,7 @@ section {
     gap: 1rem;
     margin-bottom: 3rem;
     flex-wrap: wrap;
+    
 }
 
 .filter-btn {
