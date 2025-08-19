@@ -195,69 +195,117 @@ function animateCounter(element, target) {
     }, 30);
 }
 
-// Carrossel de projetos
+// Carrossel de projetos (com autoplay que reinicia ao clicar)
 class ProjectCarousel {
-    constructor() {
-        this.track = document.getElementById('carousel-track');
-        this.prevBtn = document.getElementById('carousel-prev');
-        this.nextBtn = document.getElementById('carousel-next');
-        this.dotsContainer = document.getElementById('carousel-dots');
-        
-        if (!this.track) return;
-        
-        this.cards = this.track.querySelectorAll('.projeto-card');
-        this.currentIndex = 0;
-        
-        this.createDots();
-        this.setupEventListeners();
-        this.updateCarousel();
+  constructor() {
+    this.track = document.getElementById('carousel-track');
+    this.prevBtn = document.getElementById('carousel-prev');
+    this.nextBtn = document.getElementById('carousel-next');
+    this.dotsContainer = document.getElementById('carousel-dots');
+
+    if (!this.track) return;
+
+    this.cards = this.track.querySelectorAll('.projeto-card');
+    this.currentIndex = 0;
+
+    // autoplay
+    this.autoPlayDelay = 5000;   // 5s
+    this.timer = null;
+
+    this.createDots();
+    this.setupEventListeners();
+    this.updateCarousel();
+    this.startAutoPlay();
+  }
+
+  createDots() {
+    this.dotsContainer.innerHTML = '';
+    this.cards.forEach((_, index) => {
+      const dot = document.createElement('div');
+      dot.className = 'carousel-dot';
+      if (index === 0) dot.classList.add('active');
+      dot.addEventListener('click', () => {
+        this.goToSlide(index);
+        this.resetAutoPlay();
+      });
+      this.dotsContainer.appendChild(dot);
+    });
+  }
+
+  setupEventListeners() {
+    this.prevBtn.addEventListener('click', () => {
+      this.prevSlide();
+      this.resetAutoPlay();
+    });
+
+    this.nextBtn.addEventListener('click', () => {
+      this.nextSlide();
+      this.resetAutoPlay();
+    });
+
+    // Pausar autoplay quando o mouse estiver em cima
+    const container = this.track.closest('.projetos-carousel');
+    if (container) {
+      container.addEventListener('mouseenter', () => this.stopAutoPlay());
+      container.addEventListener('mouseleave', () => this.startAutoPlay());
     }
-    
-    createDots() {
-        this.cards.forEach((_, index) => {
-            const dot = document.createElement('div');
-            dot.className = 'carousel-dot';
-            if (index === 0) dot.classList.add('active');
-            dot.addEventListener('click', () => this.goToSlide(index));
-            this.dotsContainer.appendChild(dot);
-        });
+
+    // Evitar “pulo” quando a aba perde/ganha foco
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) this.stopAutoPlay();
+      else this.startAutoPlay();
+    });
+
+    // Se o tamanho mudar (responsivo), mantenha o slide atual
+    window.addEventListener('resize', () => this.updateCarousel());
+  }
+
+  startAutoPlay() {
+    this.stopAutoPlay(); // garante que não há timer duplicado
+    this.timer = setInterval(() => this.nextSlide(), this.autoPlayDelay);
+  }
+
+  stopAutoPlay() {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
     }
-    
-    setupEventListeners() {
-        this.prevBtn.addEventListener('click', () => this.prevSlide());
-        this.nextBtn.addEventListener('click', () => this.nextSlide());
-        
-        // Auto-play
-        setInterval(() => this.nextSlide(), 5000);
-    }
-    
-    updateCarousel() {
-        const translateX = -this.currentIndex * 100;
-        this.track.style.transform = `translateX(${translateX}%)`;
-        
-        // Update dots
-        document.querySelectorAll('.carousel-dot').forEach((dot, index) => {
-            dot.classList.toggle('active', index === this.currentIndex);
-        });
-    }
-    
-    nextSlide() {
-        this.currentIndex = (this.currentIndex + 1) % this.cards.length;
-        this.updateCarousel();
-    }
-    
-    prevSlide() {
-        this.currentIndex = this.currentIndex === 0 ? this.cards.length - 1 : this.currentIndex - 1;
-        this.updateCarousel();
-    }
-    
-    goToSlide(index) {
-        this.currentIndex = index;
-        this.updateCarousel();
-    }
+  }
+
+  resetAutoPlay() {
+    this.startAutoPlay();
+  }
+
+  updateCarousel() {
+    const translateX = -this.currentIndex * 100;
+    this.track.style.transform = `translateX(${translateX}%)`;
+
+    // atualizar dots (busca só dentro do container correto)
+    const dots = this.dotsContainer.querySelectorAll('.carousel-dot');
+    dots.forEach((dot, index) => {
+      dot.classList.toggle('active', index === this.currentIndex);
+    });
+  }
+
+  nextSlide() {
+    this.currentIndex = (this.currentIndex + 1) % this.cards.length;
+    this.updateCarousel();
+  }
+
+  prevSlide() {
+    this.currentIndex =
+      this.currentIndex === 0 ? this.cards.length - 1 : this.currentIndex - 1;
+    this.updateCarousel();
+  }
+
+  goToSlide(index) {
+    this.currentIndex = index;
+    this.updateCarousel();
+  }
 }
 
 new ProjectCarousel();
+
 
 // Filtro de projetos
 filterBtns.forEach(btn => {
