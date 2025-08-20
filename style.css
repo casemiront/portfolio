@@ -1178,7 +1178,9 @@ section {
 /* Footer */
 .footer{
   background: #0f172a !important;   /* azul-chumbo bem escuro */
-  color: #e5e7eb !important;         /* texto claro */
+  color: #e5e7eb !important;    
+  padding: 3rem 0 2rem;   /* Aumenta o espaço superior */
+  margin-top: -40px;       /* texto claro */
 }
 
 /* links do footer */
@@ -1191,6 +1193,8 @@ section {
   opacity: 1;
   color: #60a5fa;                    /* azul de destaque no hover */
 }
+
+
 
 /* linha superior da faixa inferior, se existir */
 .footer .footer-bottom{
@@ -1444,3 +1448,29 @@ html {
     }
 }
 
+.sobre-actions{
+  margin-top: 1rem;
+}
+
+.btn-download{
+  background: var(--cor-button-filter);                 
+  color: #fff;
+  box-shadow: var(--sombra);
+  padding: 14px 28px;
+  border-radius: 999px;                 
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  font-weight: 700;
+}
+.btn-download i{ font-size: 1.05rem; }
+
+.btn-download:hover{
+  transform: translateY(-3px);
+  box-shadow: var(--sombra-hover);
+}
+
+[data-theme="dark"] .btn-download{
+  color:#fff;
+  background:#7c3aed;
+}
