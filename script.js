@@ -195,21 +195,19 @@ function animateCounter(element, target) {
     }, 30);
 }
 
-// Carrossel de projetos (com autoplay que reinicia ao clicar)
+// ===== Carrossel global (setas passam por todas as categorias) =====
 class ProjectCarousel {
   constructor() {
     this.track = document.getElementById('carousel-track');
+    this.container = this.track?.closest('.carousel-container');
     this.prevBtn = document.getElementById('carousel-prev');
     this.nextBtn = document.getElementById('carousel-next');
     this.dotsContainer = document.getElementById('carousel-dots');
+    if (!this.track || !this.container) return;
 
-    if (!this.track) return;
-
-    this.cards = this.track.querySelectorAll('.projeto-card');
+    this.cards = Array.from(this.track.querySelectorAll('.projeto-card'));
     this.currentIndex = 0;
-
-    // autoplay
-    this.autoPlayDelay = 5000;   // 5s
+    this.autoPlayDelay = 5000;
     this.timer = null;
 
     this.createDots();
@@ -218,123 +216,112 @@ class ProjectCarousel {
     this.startAutoPlay();
   }
 
+  // --- autoplay ---
+  startAutoPlay() {
+    this.stopAutoPlay();
+    if (this.cards.length > 1) {
+      this.timer = setInterval(() => this.nextSlide(), this.autoPlayDelay);
+    }
+  }
+  stopAutoPlay() { if (this.timer) clearInterval(this.timer); this.timer = null; }
+  resetAutoPlay() { this.startAutoPlay(); }
+
+  // --- dots ---
   createDots() {
     this.dotsContainer.innerHTML = '';
-    this.cards.forEach((_, index) => {
+    this.cards.forEach((_, i) => {
       const dot = document.createElement('div');
-      dot.className = 'carousel-dot';
-      if (index === 0) dot.classList.add('active');
-      dot.addEventListener('click', () => {
-        this.goToSlide(index);
-        this.resetAutoPlay();
-      });
+      dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+      dot.addEventListener('click', () => { this.goToSlide(i); this.resetAutoPlay(); });
       this.dotsContainer.appendChild(dot);
     });
   }
 
   setupEventListeners() {
-    this.prevBtn.addEventListener('click', () => {
-      this.prevSlide();
-      this.resetAutoPlay();
-    });
+    this.prevBtn.addEventListener('click', () => { this.prevSlide(); this.resetAutoPlay(); });
+    this.nextBtn.addEventListener('click', () => { this.nextSlide(); this.resetAutoPlay(); });
 
-    this.nextBtn.addEventListener('click', () => {
-      this.nextSlide();
-      this.resetAutoPlay();
-    });
-
-    // Pausar autoplay quando o mouse estiver em cima
-    const container = this.track.closest('.projetos-carousel');
-    if (container) {
-      container.addEventListener('mouseenter', () => this.stopAutoPlay());
-      container.addEventListener('mouseleave', () => this.startAutoPlay());
+    const wrapper = this.track.closest('.projetos-carousel');
+    if (wrapper) {
+      wrapper.addEventListener('mouseenter', () => this.stopAutoPlay());
+      wrapper.addEventListener('mouseleave', () => this.startAutoPlay());
     }
-
-    // Evitar “pulo” quando a aba perde/ganha foco
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) this.stopAutoPlay();
-      else this.startAutoPlay();
+      if (document.hidden) this.stopAutoPlay(); else this.startAutoPlay();
     });
-
-    // Se o tamanho mudar (responsivo), mantenha o slide atual
     window.addEventListener('resize', () => this.updateCarousel());
   }
 
-  startAutoPlay() {
-    this.stopAutoPlay(); // garante que não há timer duplicado
-    this.timer = setInterval(() => this.nextSlide(), this.autoPlayDelay);
-  }
-
-  stopAutoPlay() {
-    if (this.timer) {
-      clearInterval(this.timer);
-      this.timer = null;
+  // --- "filtro" agora é um atalho: pula para a 1ª ocorrência da categoria ---
+  setFilter(category) {
+    if (category === 'all') {
+      this.goToSlide(0);
+      this.syncFilterHighlight('all');
+      this.resetAutoPlay();
+      return;
+    }
+    const idx = this.cards.findIndex(c => c.dataset.category === category);
+    if (idx !== -1) {
+      this.goToSlide(idx);
+      this.syncFilterHighlight(category);
+      this.resetAutoPlay();
     }
   }
 
-  resetAutoPlay() {
-    this.startAutoPlay();
-  }
-
+  // --- navegação global ---
   updateCarousel() {
-    const translateX = -this.currentIndex * 100;
-    this.track.style.transform = `translateX(${translateX}%)`;
+    const slideWidth = this.container.clientWidth; // px
+    const offset = -this.currentIndex * slideWidth;
+    this.track.style.transform = `translateX(${offset}px)`;
 
-    // atualizar dots (busca só dentro do container correto)
+    // dots
     const dots = this.dotsContainer.querySelectorAll('.carousel-dot');
-    dots.forEach((dot, index) => {
-      dot.classList.toggle('active', index === this.currentIndex);
-    });
+    dots.forEach((d, i) => d.classList.toggle('active', i === this.currentIndex));
+
+    // manter os botões de topo sincronizados com o slide atual
+    const cat = this.cards[this.currentIndex]?.dataset.category || 'all';
+    this.syncFilterHighlight(cat);
   }
 
   nextSlide() {
     this.currentIndex = (this.currentIndex + 1) % this.cards.length;
     this.updateCarousel();
   }
-
   prevSlide() {
-    this.currentIndex =
-      this.currentIndex === 0 ? this.cards.length - 1 : this.currentIndex - 1;
+    this.currentIndex = (this.currentIndex === 0)
+      ? this.cards.length - 1
+      : this.currentIndex - 1;
+    this.updateCarousel();
+  }
+  goToSlide(i) {
+    this.currentIndex = Math.max(0, Math.min(i, this.cards.length - 1));
     this.updateCarousel();
   }
 
-  goToSlide(index) {
-    this.currentIndex = index;
-    this.updateCarousel();
+  // liga/desliga .active nos botões de filtro conforme categoria atual
+  syncFilterHighlight(category) {
+    // usa a NodeList global 'filterBtns' já existente no seu script
+    filterBtns.forEach(b => {
+      const val = b.getAttribute('data-filter') || 'all';
+      b.classList.toggle('active', val === category);
+    });
   }
 }
 
-new ProjectCarousel();
 
 
-// Filtro de projetos
+
+// Instância única do carrossel
+const carousel = new ProjectCarousel();
+
+// Botões de topo viram "atalhos" para a categoria
 filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        filterBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        const filterValue = btn.getAttribute('data-filter');
-        
-        projetoCards.forEach((card, index) => {
-            const category = card.getAttribute('data-category');
-            const shouldShow = filterValue === 'all' || category === filterValue;
-            
-            if (shouldShow) {
-                card.style.display = 'block';
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 100);
-            } else {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    card.style.display = 'none';
-                }, 300);
-            }
-        });
-    });
+  btn.addEventListener('click', () => {
+    const filterValue = btn.getAttribute('data-filter') || 'all';
+    carousel.setFilter(filterValue); // NÃO escondemos cards; só pulamos
+  });
 });
+
 
 // Formulário de contato com validação
 contatoForm.addEventListener('submit', async function(e) {
