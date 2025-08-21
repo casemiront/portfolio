@@ -459,8 +459,9 @@ function animateOnScroll() {
         if (rect.top < window.innerHeight && !bar.classList.contains('animated')) {
             bar.classList.add('animated');
             setTimeout(() => {
-                bar.style.width = skillLevel + '%';
+                bar.style.width = skillLevel + '100%';
             }, 200);
+            
         }
     });
 }
