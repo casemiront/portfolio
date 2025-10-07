@@ -23,6 +23,7 @@
     --gradiente-secundario: linear-gradient(135deg, #64748b, #94a3b8);
     --cor-button-filter: #006aff;
     --cor-button-filter2: #ffffff;
+    --cor-button-filter3: #000000;
 }
 
 /* Tema escuro */
@@ -732,7 +733,7 @@ section {
   background-image: var(--gradiente-primario);
   background-size: 200% 100%;
   background-position: 100% 0;    /* começa “fora” */
-  color: black;
+  color: white;
 
   transition: background-position .3s ease,
               color .3s ease,
@@ -747,17 +748,6 @@ section {
   border-color: var(--cor-primaria);
   transform: translateY(-2px);
   box-shadow: var(--sombra-hover);
-}
-
-
-
-.filter-btn:hover,
-.filter-btn.active {
-    background: var(--cor-primaria);
-    border-color: var(--cor-primaria);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: var(--sombra-hover);
 }
 
 
@@ -965,6 +955,73 @@ section {
     background: var(--cor-primaria);
     transform: scale(1.2);
 }
+
+/* Serviços */
+.servicos {
+    background: var(--cor-fundo);
+}
+
+.servicos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.servico-card {
+    background: var(--cor-fundo-alt);
+    padding: 2.5rem 2rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    box-shadow: var(--sombra);
+    transition: var(--transicao);
+    position: relative;
+    overflow: hidden;
+}
+
+.servico-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--sombra-hover);
+}
+
+.servico-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: var(--gradiente-primario);
+    transform: scaleX(0);
+    transition: transform 0.4s ease;
+}
+
+.servico-card:hover::before {
+    transform: scaleX(1);
+}
+
+.servico-icon {
+    font-size: 2.5rem;
+    color: var(--cor-primaria);
+    margin-bottom: 1.5rem;
+    display: inline-block;
+    transition: var(--transicao);
+}
+
+.servico-card:hover .servico-icon {
+    transform: scale(1.1) rotate(-5deg);
+}
+
+.servico-card h3 {
+    font-size: 1.3rem;
+    color: var(--cor-texto);
+    margin-bottom: 1rem;
+}
+
+.servico-card p {
+    color: var(--cor-texto-claro);
+    line-height: 1.6;
+}
+
 
 /* Contato */
 .contato {
